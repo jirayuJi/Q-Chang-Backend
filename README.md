@@ -5,7 +5,7 @@ how to run
 path
 [GET]
   - /healthcheck
-  - /cashiers
+  - /cashiers \n
     ```curl --location --request GET 'localhost:8080/v1/cashiers?is_active=true&limit=10&page=1'```
   - /cash_log
   - /order_log
