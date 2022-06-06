@@ -9,7 +9,8 @@ Path [GET]
   - /cash_log <br> action = top-up / order-payment  <br>
     ```curl --location --request GET 'localhost:8080/v1/cash_log?action=top-up'```
   - /order_log <br>
-    ```curl --location --request GET 'localhost:8082/v1/order_log?limit=10&page=1'```<br>
+    ```curl --location --request GET 'localhost:8082/v1/order_log?limit=10&page=1'```
+    
 Path [POST]
   - /cashier <br> for create cashier<br>
     ```curl --location --request POST 'localhost:8080/v1/cashier?cashier_id=12345&location=Ton%20Son%20Tower' --header 'Content-Type: application/x-www-form-urlencoded' --data-urlencode 'cashier_id=12346' --data-urlencode 'location=computerlogy' --data-urlencode 'is_active=true'```
