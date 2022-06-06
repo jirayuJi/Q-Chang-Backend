@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"net/http"
@@ -44,13 +43,6 @@ func main() {
 			resource.cacherProduct()
 		}
 	}()
-	data := calculatePrice([]string{"1"}, []string{"1"})
-	// data, _, err := resource.calculateChange("10000", "12346", 9350.50)
-	// if err != nil {
-	// 	fmt.Println("calculateChange error:", err)
-	// }
-	dataJson, _ := json.Marshal(data)
-	fmt.Println("data:", string(dataJson))
 
 	Echo := echo.New()
 	resource.initialRouting(Echo)

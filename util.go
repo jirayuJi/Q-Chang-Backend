@@ -84,7 +84,6 @@ func (resource Resource) cacherProduct() {
 	} else {
 		fmt.Println("Product cacher error :", err.Error())
 	}
-	// fmt.Println("Product cacher done. data :", ProductDetials)
 }
 
 func convertToFloat32(data interface{}) float32 {

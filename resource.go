@@ -1,12 +1,10 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"mongodriver"
 	"net/http"
-	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -116,7 +114,6 @@ func (resource Resource) UpdateCashier(c echo.Context) error {
 		}
 		cashierDetail["updated_at"] = currentTime
 		cashierDetail["created_at"] = cashierDetail["created_at"].(primitive.DateTime).Time()
-		fmt.Println("ObjIDCashier:", ObjIDCashier)
 		query := primitive.M{"_id": ObjIDCashier}
 
 		cashierDetial, err := resource.Mongo.UpdateOne(cashierCollection, query, primitive.M{"$set": cashierDetail})
@@ -275,13 +272,13 @@ func (resource Resource) Payment(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, bson.M{"message": fmt.Sprintf("Cannot calculate change because %s", err)})
 	}
 	OrderDetail.Change = totalChange
-	OrderDetail.ReceiveCash = totalChange
+	OrderDetail.ReceiveCash = convertToFloat32(receiveCash)
 	if err := resource.updateCoinStore(changes, cashierID); err != nil {
 		return c.JSON(http.StatusInternalServerError, bson.M{"message": fmt.Sprintf("Cannot update CoinStore because %s", err)})
 	}
 	CreateCashOrder(OrderDetail)
 	dataRespons := make(map[string]interface{})
-	dataRespons["total_change"] = totalChange
+	dataRespons["order"] = OrderDetail
 	dataRespons["change_detail"] = changes
 	return c.JSON(http.StatusOK, dataRespons)
 }
@@ -303,22 +300,15 @@ func (resource Resource) calculateChange(receiveCash, cashierID string, TotalPri
 		coinStoreCollection := cashierDatabase.Collection(CoinStoreCollectionName)
 		query := primitive.M{
 			"cashier_id": cashierID,
-			"balance":    primitive.M{"$ne": 0},
 		}
 		coinStores, err := GetAllWithSort(coinStoreCollection, query, "value") //cashierDetail
 		if err != nil {
 			return changes, 0, err
 		}
-		coinStoresJson, _ := json.Marshal(coinStores)
-		fmt.Println("coinStoresJson:", string(coinStoresJson))
-		fmt.Println("totalChange:", totalChange)
 		for _, coinStore := range coinStores {
 			if valueInterface, ok := coinStore["value"]; ok {
 				value := convertToFloat32(valueInterface)
 				change := make(map[string]interface{})
-				// if value, ok := coinStore["value"].(int32); ok {
-				fmt.Println("=====================================")
-				fmt.Println("cash round value:", value)
 				valuefloat32 := float32(value)
 				changeBalance := totalChange / valuefloat32
 				if balanceStore, ok := coinStore["balance"].(int32); ok {
@@ -328,23 +318,15 @@ func (resource Resource) calculateChange(receiveCash, cashierID string, TotalPri
 				}
 				if changeBalance >= 1 {
 					if totalChange < float32(value) {
-						fmt.Println("continue!!!")
 						continue
 					}
 					change["value"] = value
 					change["quantity"] = int32(math.Trunc(float64(changeBalance)))
-					// fmt.Println("change:", change)
-					// fmt.Println("changeBalance:", float32(math.Trunc(float64(changeBalance))))
-					// fmt.Println("Balance:", float32(math.Round(float64(valuefloat32))))
-					// fmt.Println("changeBalanceOld:", changeBalance)
-					// fmt.Println("changeBalanceSum:", (float32(math.Trunc(float64(changeBalance))) * float32(valuefloat32)))
 					totalChange = totalChange - (float32(math.Trunc(float64(changeBalance))) * float32(valuefloat32))
 					changes = append(changes, change)
 				}
 			}
-			fmt.Println("totalChange:", totalChange)
 			if totalChange <= 0 {
-				fmt.Println("break!!!")
 				break
 			}
 		}
@@ -401,14 +383,9 @@ func (resource Resource) updateCoinStore(changes []map[string]interface{}, cashi
 			cashDetail := cashDetailCacher[valueFloat32]
 			cashDetailOld := Cloner(cashDetail)
 			balanceOld := cashDetail["balance"].(int32)
-			fmt.Println("quantity:", change["quantity"])
-			fmt.Println(reflect.TypeOf(change["quantity"]))
 			if valueInt32, ok := change["quantity"].(int32); ok {
-				fmt.Println("quantity:", valueInt32)
-				fmt.Println(reflect.TypeOf(valueInt32))
 				cashDetail["balance"] = balanceOld - valueInt32
 			}
-			fmt.Println("balance::", cashDetail["balance"])
 			delete(cashDetail, "_id")
 			query["value"] = change["value"]
 			if _, err := resource.Mongo.UpdateOne(coinStoreCollection, query, primitive.M{"$set": cashDetail}); err != nil {
