@@ -26,7 +26,6 @@ var configuration Configuration
 var resource Resource
 
 func init() {
-	flag.StringVar(&Env, "env", "development", "Set environment")
 	flag.StringVar(&Port, "port", "8081", "The address to listen on for HTTP requests")
 	flag.Parse()
 	configuration = GetConfiguration()

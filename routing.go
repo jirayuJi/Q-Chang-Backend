@@ -15,5 +15,4 @@ func (resource Resource) initialRouting(e *echo.Echo) {
 	v1.GET("/cash_log", resource.CashLogs)
 	v1.POST("/payment", resource.Payment)
 	v1.GET("/order_log", resource.GetOrder)
-	v1.GET("/cash_log", resource.GetLogcash)
 }
