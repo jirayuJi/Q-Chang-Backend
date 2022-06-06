@@ -19,11 +19,11 @@ Path [POST]
   - /payment <br>
   ```curl --location --request POST 'localhost:8080/v1/payment' --header 'Content-Type: application/x-www-form-urlencoded' --data-urlencode 'cashier_id=12345' --data-urlencode 'product_id=1' --data-urlencode 'quantity=1' --data-urlencode 'receive_cash=1000'```
   
-  You can see a sample of the product information at file product.json
+  You can see a sample of the product information at file product.json <br>
   
-  database 
-  host : mongodb+srv://sandbox.pb8pl.mongodb.net
-  user : m001-student
-  password : m001-mongodb-basics
+  database  <br>
+  host : mongodb+srv://sandbox.pb8pl.mongodb.net <br>
+  user : m001-student <br>
+  password : m001-mongodb-basics <br>
   
 
